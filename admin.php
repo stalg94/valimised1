@@ -1,6 +1,12 @@
 <?php
 require_once ('conf.php');
 global $yhendus;
+
+// eemalda urlist muutujad
+function clearVarsExcept($url, $varname) {
+    return strtok(basename($_SERVER['REQUEST_URI']),"?")."?$varname=".$_REQUEST[$varname];
+}
+
 if(!empty($_REQUEST['uusnimi'])){
     $kask=$yhendus->prepare('INSERT INTO valimised1(nimi, lisamisaeg)
     Values (?, Now())');
@@ -23,11 +29,10 @@ if(isset($_REQUEST["avamine"])) {
     $kask->bind_param('i', $_REQUEST["avamine"]);
     $kask->execute();
 }
-if(isset($_REQUEST["kustuta"])) {
-    $kask = $yhendus->prepare("DELETE FROM valimised1 WHERE id=?");
-    $kask->bind_param("i", $_REQUEST["kustuta"]);
+if(isSet($_REQUEST["kustutasid"])){
+    $kask=$yhendus->prepare("DELETE FROM valimised1 WHERE id=?");
+    $kask->bind_param("i",$_REQUEST["kustutasid"]);
     $kask->execute();
-    header("Location: $_SERVER[PHP_SELF]");
 }
 if(isset($_REQUEST["kustuta_punkt"])) {
     $kask = $yhendus->prepare('
@@ -79,11 +84,11 @@ if(isset($_REQUEST["kustuta_komment"])) {
         echo "<td>".htmlspecialchars($nimi)."</td>";
         echo "<td>".($seisund)."</td>";
         echo "<td><a href='?$param=$id'>$avatekst</a></td>";
-        echo "<td><a href='".strtok(basename($_SERVER['REQUEST_URI']),"&")."&kustuta=$id'>&#10060;</a></td>";
+        echo "<td><a href='$_SERVER[PHP_SELF]?kustutasid=$id'>Kustuta</a></td>";
         echo "<td>".($punktid)."</td>";
         echo "<td>".nl2br(htmlspecialchars($kommentaarid))."</td>";
-        echo "<td><a href='".strtok(basename($_SERVER['REQUEST_URI']),"&")."&kustuta_komment=$id'>Kustuta komment</a></td>";
-        echo "<td><a href='".strtok(basename($_SERVER['REQUEST_URI']),"&")."&kustuta_punkt=$id'>Kustuta punktid</a> </td>";
+        echo "<td><a href='$_SERVER[PHP_SELF]?kustuta_komment=$id'>Kustuta komment</a></td>";
+        echo "<td><a href='$_SERVER[PHP_SELF]?kustuta_punkt=$id'>Kustuta punktid</a></td>";
         echo "</tr>";
     }
     echo "</table>";
